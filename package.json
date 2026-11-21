@@ -1,0 +1,12 @@
+{
+  "name": "scan-attax",
+  "version": "1.0.0",
+  "description": "Scan Attax — scan an object, get a fighter card, battle it out as an anime episode. 1v1 rooms with voice-picked attacks.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}

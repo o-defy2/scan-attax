@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Scan Attax — Object Battle Arena</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+    <header id="topbar">
+      <div id="logo">⚔️ SCAN <span>ATTAX</span></div>
+      <div id="tagline">scan an object · get a fighter card · watch the episode</div>
+    </header>
+
+    <!-- HOME -->
+    <section id="screen-home" class="screen">
+      <div class="hero">
+        <h1>SCAN ATTAX</h1>
+        <p class="hero-sub">Every object has stats. Every fight becomes an anime episode.</p>
+        <div class="menu">
+          <button id="btn-solo" class="big-btn">🎬 Solo Battle (vs CPU)</button>
+          <button id="btn-multi" class="big-btn">🌐 Multiplayer 1v1 — Room Code</button>
+          <button id="btn-help" class="big-btn ghost">📖 How fighter stats work</button>
+        </div>
+        <p class="hint">Works best in Chrome/Edge for <b>voice attack picking</b> 🎙️ (say the move name out loud).</p>
+      </div>
+    </section>
+
+    <!-- SCAN -->
+    <section id="screen-scan" class="screen" hidden>
+      <h2>Scan your fighter</h2>
+      <p class="hint">Pick a preset object, or scan your own (demo scanner: the form is what the AI would report from a photo).</p>
+      <div id="preset-grid"></div>
+
+      <div class="scan-cols">
+        <div class="panel">
+          <h3>📷 Camera scan <span class="demo-tag">demo</span></h3>
+          <div id="camera-wrap" hidden>
+            <video id="camera" autoplay playsinline muted></video>
+            <button id="btn-snap" class="small-btn">📸 Snap photo</button>
+            <p class="hint" id="snap-note">Photo captured! Now confirm the facts the scanner reports →</p>
+          </div>
+          <button id="btn-camera" class="small-btn">Enable camera</button>
+          <label>Object name</label>
+          <input id="inp-name" type="text" placeholder="e.g. My lucky mug" maxlength="30">
+          <button id="btn-genscan" class="small-btn accent">🤖 AI scan (auto-fill facts)</button>
+        </div>
+
+        <div class="panel">
+          <h3>🔎 Reported facts</h3>
+          <div class="form-grid">
+            <label>Weight (g)</label><input id="inp-weight" type="number" min="0.1" step="any" value="350">
+            <label>Longest side (cm)</label><input id="inp-size" type="number" min="0.5" step="any" value="10">
+            <label>Main material</label><select id="sel-material"></select>
+            <label>Condition</label><select id="sel-condition"></select>
+            <label>Rank</label><select id="sel-rank"></select>
+            <label>Aura (1–10)</label>
+            <div class="aura-row"><input id="inp-aura" type="range" min="1" max="10" value="5"><span id="aura-val">5</span></div>
+            <label>Aura reason</label><input id="inp-aura-reason" type="text" placeholder="e.g. Aura 7: covered in stickers" maxlength="80">
+          </div>
+          <label>Properties (up to 3)</label>
+          <div id="prop-checks"></div>
+          <button id="btn-makecard" class="big-btn accent">✨ Generate fighter card</button>
+        </div>
+
+        <div class="panel">
+          <h3>🃏 Your card</h3>
+          <div id="card-preview"><p class="hint">No card yet — pick a preset or scan an object.</p></div>
+          <button id="btn-to-battle" class="big-btn" hidden>⚔️ Ready to fight</button>
+        </div>
+      </div>
+      <button id="btn-scan-back" class="small-btn ghost">← back</button>
+    </section>
+
+    <!-- LOBBY (multiplayer) -->
+    <section id="screen-lobby" class="screen" hidden>
+      <h2>🌐 1v1 Room</h2>
+      <div id="net-status" class="hint">connecting…</div>
+
+      <div class="panel" id="lobby-setup">
+        <div class="row">
+          <button id="btn-create-room" class="big-btn accent">Create room</button>
+          <div class="join-row">
+            <input id="inp-code" maxlength="5" placeholder="CODE" autocomplete="off">
+            <button id="btn-join" class="big-btn">Join</button>
+          </div>
+        </div>
+        <div id="room-code-wrap" hidden>
+          <p>Share this 5-letter room code with your friend:</p>
+          <div id="room-code">-----</div>
+          <button id="btn-copy-code" class="small-btn">copy</button>
+        </div>
+      </div>
+
+      <div class="panel" hidden id="lobby-room">
+        <div id="lobby-players">
+          <div class="lobby-slot" id="slot-0"><b>Player 1</b><div class="slot-body">waiting…</div></div>
+          <div class="vs-mini">VS</div>
+          <div class="lobby-slot" id="slot-1"><b>Player 2</b><div class="slot-body">waiting…</div></div>
+        </div>
+        <div class="row">
+          <button id="btn-lobby-scan" class="big-btn">📷 Scan your fighter</button>
+          <button id="btn-ready" class="big-btn accent" disabled>Ready!</button>
+        </div>
+        <div id="lobby-status" class="hint"></div>
+      </div>
+      <button id="btn-lobby-back" class="small-btn ghost">← leave</button>
+    </section>
+
+    <!-- BATTLE -->
+    <section id="screen-battle" class="screen" hidden>
+      <div id="arena-wrap">
+        <canvas id="arena" width="960" height="540"></canvas>
+        <div id="pick-bar" hidden>
+          <div id="pick-title">🎙️ Say your attack — or tap:</div>
+          <div id="move-btns"></div>
+          <div class="pick-row">
+            <button id="btn-mic" class="small-btn">🎙️ Voice: off</button>
+            <div id="voice-status" class="hint">—</div>
+            <div id="pick-timer"><div id="pick-timer-fill"></div></div>
+          </div>
+        </div>
+      </div>
+      <div id="battle-log"></div>
+      <button id="btn-leave-battle" class="small-btn ghost">← quit battle</button>
+    </section>
+
+    <!-- HELP -->
+    <section id="screen-help" class="screen" hidden>
+      <h2>📖 How fighter stats work</h2>
+      <div class="panel help-body">
+        <p><b>The basics:</b> when you scan an object, the scanner reports facts (weight, size, material, up to 3 properties, condition, Aura). The code turns those facts into stats with fixed rules — the dice decide every hit, so nobody can rig the result.</p>
+        <h3>The five stats (1–10 each)</h3>
+        <table>
+          <tr><th>Stat</th><th>Comes from</th><th>Does in a fight</th></tr>
+          <tr><td>💪 Strength</td><td>weight (+2 sharp, +1 hot)</td><td>damage per hit</td></tr>
+          <tr><td>🛡️ Durability</td><td>material + condition</td><td>HP = 20 + Durability × 5</td></tr>
+          <tr><td>⚡ Speed</td><td>weight (light = fast)</td><td>attacks first each round</td></tr>
+          <tr><td>🌀 Agility</td><td>size (+2 flexible)</td><td>dodge chance = Agility × 4% (max 40%)</td></tr>
+          <tr><td>✨ Aura</td><td>how iconic the object is</td><td>critical chance = Aura × 3% (×1.5 damage)</td></tr>
+        </table>
+        <h3>Ranks</h3>
+        <p>S 43–50 · A 37–42 · B 31–36 · C 25–30 · D 19–24 · E 13–18 · F 5–12 total stat points. Stats are scaled evenly until the total fits the rank. Condition is applied last: <b>New</b> +1 Durability (Mint), <b>Worn</b> −1 Durability +1 Aura (Battle-worn), <b>Damaged</b> −2 Durability +1 Aura.</p>
+        <h3>Moves &amp; battle</h3>
+        <p>Each fighter has 3 moves: Move 1 on odd rounds, Move 2 on even rounds, and a <b>special</b> used once (round 3) for double damage. Damage = Strength + dice (1–6), doubled/halved by the matchup (liquid&gt;electronic/paper, sharp&gt;paper/fabric/plastic, heavy&gt;glass/ceramic, hot&gt;food/plastic; sharp is halved vs flexible), ×2 for specials, ×1.5 on a critical. Battle ends on a KO or after 10 rounds — then the higher HP% wins.</p>
+        <h3>🎙️ Voice attacks &amp; rooms</h3>
+        <p>During each round you can <b>say your attack</b> (move name, "one/two/three", or "special"). In multiplayer, create a room to get a 5-letter code and have a friend join — the server runs the fight and both of you watch the same anime episode.</p>
+      </div>
+      <button id="btn-help-back" class="small-btn ghost">← back</button>
+    </section>
+  </div>
+
+  <div id="overlay" hidden>
+    <div id="overlay-card">
+      <h2 id="overlay-title">EPISODE COMPLETE</h2>
+      <p id="overlay-text"></p>
+      <div class="row">
+        <button id="btn-rematch" class="big-btn accent">🔁 Rematch</button>
+        <button id="btn-overlay-menu" class="big-btn ghost">Main menu</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" hidden></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/stats.js"></script>
+  <script src="js/battle.js"></script>
+  <script src="js/episode.js"></script>
+  <script src="js/voice.js"></script>
+  <script src="js/net.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
